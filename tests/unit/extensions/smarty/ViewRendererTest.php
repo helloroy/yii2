@@ -10,6 +10,7 @@ namespace yiiunit\extensions\smarty;
 use yii\web\AssetManager;
 use yii\web\View;
 use Yii;
+use yiiunit\data\base\Singer;
 use yiiunit\TestCase;
 
 /**
@@ -41,6 +42,33 @@ class ViewRendererTest extends TestCase
         $this->assertEquals('test view Hello World!.', $content);
     }
 
+    public function testLayoutAssets()
+    {
+        $view = $this->mockView();
+        $content = $view->renderFile('@yiiunit/extensions/smarty/views/layout.tpl');
+
+        $this->assertEquals(1, preg_match('#<script src="/assets/[0-9a-z]+/jquery\\.js"></script>\s*</body>#', $content), 'Content does not contain the jquery js:' . $content);
+    }
+
+
+    public function testChangeTitle()
+    {
+        $view = $this->mockView();
+        $view->title = 'Original title';
+
+        $content = $view->renderFile('@yiiunit/extensions/smarty/views/changeTitle.tpl');
+        $this->assertTrue(strpos($content, 'New title') !== false, 'New title should be there:' . $content);
+        $this->assertFalse(strpos($content, 'Original title') !== false, 'Original title should not be there:' . $content);
+    }
+
+    public function testForm()
+    {
+        $view = $this->mockView();
+        $model = new Singer();
+        $content = $view->renderFile('@yiiunit/extensions/smarty/views/form.tpl', ['model' => $model]);
+        $this->assertEquals(1, preg_match('#<form id="login-form" class="form-horizontal" action="/form-handler" method="post">.*?</form>#s', $content), 'Content does not contain form:' . $content);
+    }
+
     /**
      * @return View
      */
@@ -50,6 +78,11 @@ class ViewRendererTest extends TestCase
             'renderers' => [
                 'tpl' => [
                     'class' => 'yii\smarty\ViewRenderer',
+                    'widgets' => [
+                        'blocks' => [
+                            'ActiveForm' => '\yii\widgets\ActiveForm',
+                        ],
+                    ],
                 ],
             ],
             'assetManager' => $this->mockAssetManager(),

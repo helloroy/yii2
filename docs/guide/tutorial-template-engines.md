@@ -106,9 +106,9 @@ Aliased class import:
 {{ use({'alias' => '/app/widgets/MyWidget'}) }}
 ```
 
-#### Referencing other views
+#### Referencing other templates
 
-There are two ways of referencing views in `include` and `extends` statements:
+There are two ways of referencing templates in `include` and `extends` statements:
 
 ```
 {% include "comment.twig" %}
@@ -118,8 +118,8 @@ There are two ways of referencing views in `include` and `extends` statements:
 {% extends "@app/views/layouts/2columns.twig" %}
 ```
 
-In the first case the view will be searched relatively to the path current view is in. For `comment.twig` and `post.twig`
-that means these will be searched in the same directory as the view that's rendered currently.
+In the first case the view will be searched relatively to the current template path. For `comment.twig` and `post.twig`
+that means these will be searched in the same directory as the currently rendered template.
 
 In the second case we're using path aliases. All the Yii aliases such as `@app` are available by default.
 
@@ -264,8 +264,9 @@ Then in the template you can apply filter using the following syntax:
 Smarty
 ------
 
-To use Smarty, you need to create templates in files that have the `.tpl` extension (or use another file extension but configure the component accordingly). Unlike standard view files, when using Smarty you must include the extension in your `$this->render()`
-or `$this->renderPartial()` controller calls:
+To use Smarty, you need to create templates in files that have the `.tpl` extension (or use another file extension but
+configure the component accordingly). Unlike standard view files, when using Smarty you must include the extension in
+your `$this->render()` or `$this->renderPartial()` controller calls:
 
 ```php
 return $this->render('renderer.tpl', ['username' => 'Alex']);
@@ -277,20 +278,106 @@ The best resource to learn Smarty template syntax is its official documentation 
 [www.smarty.net](http://www.smarty.net/docs/en/). Additionally there are Yii-specific syntax extensions
 described below.
 
-#### Additional functions
+#### Setting object properties
 
-Yii adds the following construct to the standard Smarty syntax:
+There's a special function called `set` that allows you to set common properties of the view and controller. Currently
+available properties are `title`, `theme` and `layout`:
+
+```
+{set title='New title')}
+```
+
+#### Importing namespaces and classes
+
+You can import additional classes right in the template:
+
+```
+Will import class as JqueryAsset:
+{use class="yii\web\JqueryAsset"}
+
+Aliased class import. Will import class as AssetJquery:
+{use class="yii\web\JqueryAsset" as="AssetJquery"}
+```
+
+#### Referencing other templates
+
+There are two main ways of referencing templates in `include` and `extends` statements:
+
+```
+{include 'comment.tpl'}
+{extends 'post.tpl'}
+
+{include 'file:[app]views/snippets/avatar.tpl'}
+{extends 'file:[app]views/layouts/2columns.tpl'}
+```
+
+In the first case the view will be searched relatively to the current template path. For `comment.tpl` and `post.tpl`
+that means these will be searched in the same directory as the currently rendered template.
+
+In the second case we're using path aliases. All the Yii aliases such as `@app` are available by default.
+
+For additional info on referencing templates see [Chapter 16. Resources](http://www.smarty.net/docs/en/resources.tpl) of
+the Smarty documentation.
+
+#### Widgets
+
+Extension helps using widgets in convenient way converting their syntax to function calls. First you need to make widget
+available to template engine using config file:
+
+```php
+'components' => [
+    'view' => [
+        // ...
+        'renderers' => [
+            'tpl' => [
+                'class' => 'yii\smarty\ViewRenderer',
+                'widgets' => [
+                    'blocks' => [
+                        'ActiveForm' => '\yii\widgets\ActiveForm',
+                    ],
+                ],
+            ],
+        ],        
+    ],
+],
+```
+
+Then the following syntax is available:
+
+```
+{ActiveForm assign='form' id='login-form' action='/form-handler' options=['class' => 'form-horizontal']}
+    {$form->field($model, 'firstName')}
+    <div class="form-group">
+        <div class="col-lg-offset-1 col-lg-11">
+            <input type="submit" value="Login" class="btn btn-primary" />
+        </div>
+    </div>
+{/ActiveForm}
+```
+
+#### Assets
+
+Assets could be registered the following way:
+
+```
+{use class="yii\web\JqueryAsset"}
+{JqueryAsset::register($this)|void}
+```
+
+#### URLs
+
+There are two functions you can use for building URLs:
 
 ```php
 <a href="{path route='blog/view' alias=$post.alias}">{$post.title}</a>
+<a href="{url route='blog/view' alias=$post.alias}">{$post.title}</a>
 ```
 
-Internally, the `path()` function calls Yii's `Url::to()` method.
+`path` generates relative URL while `url` generates absolute one. Internally both are using [[\yii\helpers\Url]].
 
 #### Additional variables
 
-Within Smarty templates, you can also make use of these variables:
+Within Smarty templates the following variables are always defined:
 
 - `$app`, which equates to `\Yii::$app`
 - `$this`, which equates to the current `View` object
-
