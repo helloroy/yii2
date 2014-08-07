@@ -69,6 +69,20 @@ class ViewRendererTest extends TestCase
         $this->assertEquals(1, preg_match('#<form id="login-form" class="form-horizontal" action="/form-handler" method="post">.*?</form>#s', $content), 'Content does not contain form:' . $content);
     }
 
+    public function testInheritance()
+    {
+        $view = $this->mockView();
+        $content = $view->renderFile('@yiiunit/extensions/smarty/views/extends2.tpl');
+        $this->assertTrue(strpos($content, 'Hello, I\'m inheritance test!') !== false, 'Hello, I\'m inheritance test! should be there:' . $content);
+        $this->assertTrue(strpos($content, 'extends2 block') !== false, 'extends2 block should be there:' . $content);
+        $this->assertFalse(strpos($content, 'extends1 block') !== false, 'extends1 block should not be there:' . $content);
+
+        $content = $view->renderFile('@yiiunit/extensions/smarty/views/extends3.tpl');
+        $this->assertTrue(strpos($content, 'Hello, I\'m inheritance test!') !== false, 'Hello, I\'m inheritance test! should be there:' . $content);
+        $this->assertTrue(strpos($content, 'extends3 block') !== false, 'extends3 block should be there:' . $content);
+        $this->assertFalse(strpos($content, 'extends1 block') !== false, 'extends1 block should not be there:' . $content);
+    }
+
     /**
      * @return View
      */
