@@ -11,6 +11,7 @@ use Smarty;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
+use yii\web\View;
 
 /**
  * Extension provides Yii-specific syntax for Smarty templates.
