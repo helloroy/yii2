@@ -81,12 +81,6 @@ class ViewRenderer extends BaseViewRenderer
         ]);
         $this->addAliases(Yii::$aliases);
 
-        // Set default template directories to current view's dir and application view dir
-        $this->smarty->setTemplateDir([
-            dirname(Yii::$app->getView()->getViewFile()),
-            Yii::$app->getViewPath(),
-        ]);
-
         // Add additional plugin dirs from configuration array, apply Yii's dir convention
         foreach ($this->pluginDirs as &$dir) {
             $dir = $this->resolveTemplateDir($dir);
